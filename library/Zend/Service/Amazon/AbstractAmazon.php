@@ -28,7 +28,7 @@ namespace Zend\Service\Amazon;
  * Abstract Amazon class that handles the credentials for any of the Web Services that
  * Amazon offers
  *
- * @uses       Zend\Service\AbstractService
+ * @uses       \Zend\Service\AbstractService
  * @uses       \Zend\Service\Amazon\Exception
  * @category   Zend
  * @package    Zend_Service
@@ -50,6 +50,7 @@ abstract class AbstractAmazon extends \Zend\Service\AbstractService
 
     /**
      * @var string Amazon Secret Key
+     * FIXME: why not private?
      */
     protected $_secretKey;
 
@@ -58,7 +59,6 @@ abstract class AbstractAmazon extends \Zend\Service\AbstractService
      */
     protected $_accessKey;
 
-
     /**
      * Set the keys to use when accessing SQS.
      *
@@ -66,7 +66,7 @@ abstract class AbstractAmazon extends \Zend\Service\AbstractService
      * @param  string $secret_key       Set the default Secret Key
      * @return void
      */
-    public static function setKeys($accessKey, $secretKey)
+    public static function setDefaultKeys($accessKey = null, $secretKey = null)
     {
         self::$_defaultAccessKey = $accessKey;
         self::$_defaultSecretKey = $secretKey;
@@ -77,29 +77,21 @@ abstract class AbstractAmazon extends \Zend\Service\AbstractService
      *
      * @param  string $access_key       Override the default Access Key
      * @param  string $secret_key       Override the default Secret Key
-     * @return void
      */
-    public function __construct($accessKey=null, $secretKey=null)
+    public function __construct($accessKey = null, $secretKey = null)
     {
-        if(!$accessKey) {
-            $accessKey = self::$_defaultAccessKey;
-        }
-        if(!$secretKey) {
-            $secretKey = self::$_defaultSecretKey;
-        }
+        $this->_accessKey = ($accessKey ?: self::$_defaultAccessKey);
+        $this->_secretKey = ($secretKey ?: self::$_defaultSecretKey);
 
-        if(!$accessKey || !$secretKey) {
-            throw new Exception\InvalidArgumentException("AWS keys were not supplied");
+        if (!$this->_accessKey || !$this->_secretKey) {
+            throw new Exception\InvalidArgumentException("AWS access and/or secret keys were not supplied");
         }
-        $this->_accessKey = $accessKey;
-        $this->_secretKey = $secretKey;
     }
-
-
 
     /**
      * Method to fetch the Access Key
      *
+     * FIXME: if _accessKey not private, why do we need this? for sure we will never make it public
      * @return string
      */
     protected function _getAccessKey()

@@ -1,0 +1,45 @@
+
+
+S3:
+
+- Removed Abstract::setEndpoint(), there is no reason to expose the endpoint of a webservice. This is
+   builtin in the definitions, like the parameters name etc. it only clutters the interface
+
+
+ - Dropped multiple support of putFile() and putFileStream() because at this level is
+   pointless: if you have a stored file on the harddisk, you always want to stream it,
+   and if for any esoteric reason you really don't want to, doing a putObject(file_get_contents($file)) is not going
+   to kill anybody and won't clutter your higher level code.
+
+ - Dropped cleanBucket() method
+   Rationale: A developer firstly approaching these APIs shouldn't need to know/understand the internal working
+     of the underlying REST APIs, so all we want him to know that each of his method calls will be resolved with O(1)
+     HTTP calls to the underlying APIs. So this method 
+     Also reimplementing this functionality in the caller is not a big deal, it can be implemented with a simple foreach()
+     and a multipleDelete() call
+
+
+ - Method getBuckets() renamed to Service::listBuckets()
+   Rationale: listing buckets is something invisible to the Bucket object, so it has been moved to the Service class,
+     which is able to manipulate buckets, and uses the work "list" rather then the abused "get".
+
+
+ - Deleting a bucket
+     I'm in doubt between removeBucket, destroyBucket, and deleteBucket
+
+
+
+
+// test suite:
+
+
+
+ create bucket1
+ create bucket2
+ test listBuckets
+ put object in bucket1
+ try to remove non empty bucket1
+ remove object
+ remove bucket1
+ remove bucket2
+ try to remove non existing bucket1
